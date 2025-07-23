@@ -1,39 +1,37 @@
-package TestBases;
+package Utils;
 
-import com.aventstack.extentreports.ExtentReports;
-import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.*;
 import com.aventstack.extentreports.reporter.ExtentSparkReporter;
-import org.testng.ITestContext;
-import org.testng.ITestListener;
-import org.testng.ITestResult;
+import org.testng.*;
 
 import java.nio.file.Paths;
 
 public class ExtentReportListener implements ITestListener {
-    private ExtentReports extent;
-    public ExtentTest test;
-    public static String currentDir = System.getProperty("user.dir");
 
-    String reportName = this.getClass().getSimpleName();
+    private ExtentReports extent;
+    private ExtentTest test;
+    private static final String REPORT_FOLDER = ConfigReaderWriter.getPropKey("report.folder");
+    private static final String REPORT_NAME = ConfigReaderWriter.getPropKey("report.name");
 
     @Override
     public void onStart(ITestContext context) {
-        String reportPath = Paths.get(currentDir, "reports").toString();
-        ExtentSparkReporter sparkReporter = new ExtentSparkReporter(reportPath + "\\" + reportName + ".html");
+        // Build the report path under /target/reports/ExtentReport.html
+        String reportPath = Paths.get(System.getProperty("user.dir"), REPORT_FOLDER, REPORT_NAME + ".html").toString();
+
+        ExtentSparkReporter spark = new ExtentSparkReporter(reportPath);
         extent = new ExtentReports();
-        extent.attachReporter(sparkReporter);
-        //extent.setSystemInfo("JAVA","");
+        extent.attachReporter(spark);
     }
+
 
     @Override
     public void onTestStart(ITestResult result) {
         test = extent.createTest(result.getMethod().getMethodName());
-
     }
 
     @Override
     public void onTestSuccess(ITestResult result) {
-        test.pass("Test passed");
+        test.pass("✅ Test passed");
     }
 
     @Override
@@ -50,4 +48,5 @@ public class ExtentReportListener implements ITestListener {
     public void onFinish(ITestContext context) {
         extent.flush();
     }
+
 }
